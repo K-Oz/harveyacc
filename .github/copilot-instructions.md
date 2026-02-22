@@ -33,20 +33,22 @@ sudo apt-get update
 sudo apt-get install -y qemu-system-i386 qemu-utils expect rc go-dep
 
 # Go tools
-go get harvey-os.org/cmd/ufs
+go install harvey-os.org/cmd/ufs@latest
 
 # Plan 9 ISO (automatically downloaded during build)
 ```
 
 ### Build Process Overview
 1. **Dependency Download** (5-10 minutes)
-2. **Plan 9 Boot** (5-10 minutes) 
-3. **Source Mount via 9P** (2-3 minutes)
-4. **Harvey Build** (60-70 minutes)
+2. **Plan 9 ISO Download** (if needed)
+3. **Source Packaging** (creates harvey.tgz) 
+4. **Plan 9 Boot in QEMU** (5-10 minutes) 
+5. **Source Mount via 9P** (2-3 minutes)
+6. **Harvey Build** (60-70 minutes)
    - **GhostScript compilation**: 25+ minutes (appears frozen - THIS IS NORMAL)
    - Kernel compilation: 15-20 minutes
    - Userspace compilation: 20-25 minutes
-5. **ISO Creation** (5-10 minutes)
+7. **ISO Creation** (5-10 minutes)
 
 ### CRITICAL Build Timeouts
 - **Total build time**: 90-95 minutes minimum
@@ -134,17 +136,23 @@ function(int arg)
 
 ## Build Commands
 
-### Basic Build
+### Main Build Process
 ```bash
 cd build
-bash command.bash  # Basic build command
+bash build.bash  # Main Harvey OS build (90+ minutes)
+```
+
+### Test/Demo Build (Shorter)
+```bash
+cd build
+bash command.bash  # Quick test/demo build
 ```
 
 ### Development Build with Monitoring
 ```bash
 cd build
-# Start build (will take 90+ minutes)
-timeout 7200 bash command.bash || echo "Build completed or timed out"
+# Start full build (will take 90+ minutes)
+timeout 7200 bash build.bash || echo "Build completed or timed out"
 ```
 
 ### Testing
@@ -187,7 +195,7 @@ qemu-system-i386 -cdrom harvey.iso
 **Solution**: In sandboxed environments, KVM may not be available. Build will work but be slower.
 
 **Problem**: Go compilation errors
-**Solution**: Ensure Go 1.16+ is installed and `GOPATH` is set correctly.
+**Solution**: Ensure Go 1.17+ is installed and use `go install` for tool installation.
 
 ### Runtime Issues
 
